@@ -38,7 +38,6 @@ const sendErrorProd = (err, res) => {
       message: err.message,
     });
   } else {
-    // console.error('ERROR', err);
     res.status(500).json({
       status: "error",
       message: "Something went very wrong!",
@@ -52,17 +51,14 @@ module.exports = (err, req, res, next) => {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
-    // cast error is like trying to access a project with an invalid id
     if (err.name === "CastError") {
       error = handleCastErrorDB(error);
     }
-    // an error with 11000 is thrown by mongo not mongoose when trying to create a user
-    // with a field that already exists on another user (duplicate key)
+
     if (err.code === 11000) {
       error = handleDuplicateFieldDB(error);
     }
 
-    // VALIDATION ERROR
     if (err.name === "ValidationError") {
       error = handleValidationErrorDB(error);
     }
